@@ -10,32 +10,59 @@ import SwiftUI
 struct ContentView: View {
     let predators = Predators()
     
+    @State var searchText = ""
+    
+    var filterDinos: [ApexPredator] {
+        if searchText.isEmpty {
+            return predators.apexPredators
+        }
+        else {
+            return predators.apexPredators.filter { predator in
+                predator.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
     var body: some View {
-        List(predators.apexPredators) { predator in
-            HStack {
-               // Image
-                Image(predator.image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .shadow(color: .white, radius: 2)
-                
-                VStack(alignment: .leading) {
-                    // Name
-                    Text(predator.name)
-                        .fontWeight(.bold)
+        NavigationStack {
+            List(filterDinos) { predator in
+                NavigationLink {
+                    Image(predator.image)
+                        .resizable()
+                        .scaledToFit()
+                } label: {
+                    HStack {
+                        // Image
+                        Image(predator.image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .shadow(color: .white, radius: 2)
                         
-                    // Type
-                    Text(predator.type.rawValue.capitalized)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 13)
-                        .padding(.vertical, 5)
-                        .background(predator.type.background)
-                        .clipShape(.capsule)
-                        
+                        VStack(alignment: .leading) {
+                            // Name
+                            Text(predator.name)
+                                .fontWeight(.bold)
+                            
+                            // Type
+                            Text(predator.type.rawValue.capitalized)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 13)
+                                .padding(.vertical, 5)
+                                .background(predator.type.background)
+                                .clipShape(.capsule)
+                        }
+                    }
                 }
             }
+            .navigationTitle("Apex Predators")
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always)
+            )
+            .autocorrectionDisabled()
+            .animation(.default, value: searchText)
         }
         .preferredColorScheme(.dark)
     }
